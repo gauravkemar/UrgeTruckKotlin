@@ -1,6 +1,6 @@
 package com.example.urgetruckkotlin.model.login
 
-data class LoginResponse (
+data class LoginResultModel (
     val id: Int,
     val firstName : String,
     val lastName :String,

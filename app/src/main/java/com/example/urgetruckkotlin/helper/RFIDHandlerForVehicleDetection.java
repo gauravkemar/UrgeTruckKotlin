@@ -1,4 +1,4 @@
-package com.example.urgetruckkotlin;
+package com.example.urgetruckkotlin.helper;
 
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RFIDHandlerForDispatch implements Readers.RFIDReaderEventHandler {
+public class RFIDHandlerForVehicleDetection implements Readers.RFIDReaderEventHandler {
 
     final static String TAG = "RFID_SAMPLE";
     // RFID Reader
@@ -48,9 +48,8 @@ public class RFIDHandlerForDispatch implements Readers.RFIDReaderEventHandler {
     private EventHandler eventHandler;
     // UI and context
     TextView textView;
-    private DispatchVehicleActivity context;
+    private VehicleDetectionActivity context;
 
-    private VehicleDetectionActivity Context;
     // general
     private int MAX_POWER = 30;
     private int POWER_REQUIRED = 50;
@@ -58,7 +57,7 @@ public class RFIDHandlerForDispatch implements Readers.RFIDReaderEventHandler {
     String readerName = "RFD4031-G10B700-JP";
 
 
-    public void init(DispatchVehicleActivity activity) {
+    public void init(VehicleDetectionActivity activity) {
         // application context
         context = activity;
         // Status UI

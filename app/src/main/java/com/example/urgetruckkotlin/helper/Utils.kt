@@ -1,6 +1,7 @@
 package com.example.urgetruckkotlin.helper
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
@@ -104,6 +105,25 @@ object Utils {
             view = View(activity)
         }
         imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    fun showCustomDialog(context: Context, message: String) {
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("OK") { dialogInterface, i ->
+                // Handle the OK button press if needed
+            }
+            .show()
+    }
+    fun showCustomDialogFinish(context: Context, message: String) {
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("OK") { dialogInterface, _ ->
+                (context as? Activity)?.finish()
+            }
+            .show()
     }
 
     /* fun handleGeneralResponse(response: Response<GeneralResponse>): Resource<GeneralResponse> {

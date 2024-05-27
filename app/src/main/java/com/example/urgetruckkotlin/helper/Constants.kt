@@ -41,7 +41,9 @@ object Constants {
 
 
     const val LOGIN_URL = "Login"
-    const val GET_LOCATION_MASTER_URL = "GetLocationMasterData"
+    const val GET_LOCATION_DEFAULT = "GetLocationList"
+    const val GET_LOCATION_LIST = "GetLocationList"
+
     const val GET_LOCATION_MASTER_DATA_BY_LOCATION_ID="GetLocationMasterDataByLocationId"
     const val POST_RFId="POSTRFIDTag"
 

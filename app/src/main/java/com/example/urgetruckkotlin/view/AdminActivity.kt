@@ -24,36 +24,34 @@ class AdminActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_admin)
         session = SessionManager(this)
         val layout_toolbar = findViewById<View>(R.id.layout_toolbar)
-         val toolbarText = layout_toolbar.findViewById<TextView>(R.id.toolbarText)
-          toolbarText.setText(getString(R.string.admin))
+        val toolbarText = layout_toolbar.findViewById<TextView>(R.id.toolbarText)
+        toolbarText.setText(getString(R.string.admin))
 
         val settingBtn = layout_toolbar.findViewById<ImageView>(R.id.ivRightSettings)
 
         val ivLogo: ImageView = layout_toolbar.findViewById<ImageView>(R.id.ivLogoLeftToolbar)
-            ivLogo.visibility = View.VISIBLE
+        ivLogo.visibility = View.VISIBLE
 
-           binding.btAntenna.setOnClickListener{checkinputAntenna()}
-        binding.btSubmit.setOnClickListener{checkinputUrl()}
-
-
+        binding.btAntenna.setOnClickListener { checkinputAntenna() }
+        binding.btSubmit.setOnClickListener { checkinputUrl() }
 
         ivLogo.setImageResource(R.drawable.ut_logo_with_outline)
-            ivLogo.setOnClickListener { view: View? ->
-                startActivity(
-                    Intent(
-                            this@AdminActivity,
-                        HomeActivity::class.java
-                    )
+        ivLogo.setOnClickListener { view: View? ->
+            startActivity(
+                Intent(
+                    this@AdminActivity,
+                    HomeActivity::class.java
                 )
-                finishAffinity() }
+            )
+            finishAffinity()
+        }
     }
+
     private fun checkinputUrl() {
-        val url: String =binding.edServerIp.getText().toString().trim { it <= ' ' }
+        val url: String = binding.edServerIp.getText().toString().trim { it <= ' ' }
         if (url == "") {
-           binding.edServerIp.setError("Please enter ip address")
+            binding.edServerIp.setError("Please enter ip address")
         } else {
-
-
             Utils.setSharedPrefs(this@AdminActivity, "token", "")
             Utils.setSharedPrefs(this@AdminActivity, "username", "")
             Utils.setSharedPrefs(this@AdminActivity, "isadmin", "")
@@ -64,6 +62,7 @@ class AdminActivity : AppCompatActivity() {
             )
         }
     }
+
     fun showCustomDialogFinish(context: Context?, message: String?) {
         val builder = AlertDialog.Builder(context)
         builder.setMessage(message)
@@ -75,15 +74,16 @@ class AdminActivity : AppCompatActivity() {
             }
             .show()
     }
+
     private fun checkinputAntenna() {
         val antenna: String = binding.tvantenna.text.toString().trim { it <= ' ' }
         if (antenna.isEmpty()) {
-          binding.textinputantenna.setError("Please enter the Antenna Power")
+            binding.textinputantenna.setError("Please enter the Antenna Power")
         } else if (antenna.toInt() > 300) {
-           binding.textinputantenna.setError("Entered Antenna Power Should be less than 300")
+            binding.textinputantenna.setError("Entered Antenna Power Should be less than 300")
         } else {
 
-            Utils.getSharedPrefs(this@AdminActivity,"antennapower", antenna)
+            Utils.getSharedPrefs(this@AdminActivity, "antennapower", antenna)
 
             session.showCustomDialogFinish(
                 this@AdminActivity,

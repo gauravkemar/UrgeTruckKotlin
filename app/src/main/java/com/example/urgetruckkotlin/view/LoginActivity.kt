@@ -38,11 +38,13 @@ class LoginActivity : AppCompatActivity() {
         session = SessionManager(this)
         binding.buttonLogin.setOnClickListener {
 
-            if (binding.tvusername.text.toString().trim() == "admin" && binding.tvpassword.text.toString().trim() == "utmobile") {
+            if (binding.tvusername.text.toString()
+                    .trim() == "admin" && binding.tvpassword.text.toString().trim() == "utmobile"
+            ) {
                 Utils.setSharedPrefs(this@LoginActivity, "isadmin", "true")
                 Utils.setSharedPrefs(this@LoginActivity, "username", "Administrator")
                 Utils.setSharedPrefs(this@LoginActivity, "token", "local")
-                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                 finish()
             } else {
                 login()
@@ -51,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
             //startActivity(Intent(this@LoginActivity,VinRfidMappingActivity::class.java))
         }
 
-            viewModel.loginMutableLiveData.observe(this) { response ->
+        viewModel.loginMutableLiveData.observe(this) { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
@@ -94,12 +96,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun startActivity()
-    {
+    fun startActivity() {
         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
         finish()
     }
-    private fun clear(){
+
+    private fun clear() {
         binding.tvusername.setText("")
         binding.tvpassword.setText("")
     }
@@ -111,9 +113,11 @@ class LoginActivity : AppCompatActivity() {
     private fun hideProgressBar() {
         progress.cancel()
     }
+
     private fun showErrorMessage(message: String) {
-    Toasty.warning(this@LoginActivity, message, Toasty.LENGTH_SHORT).show()
-}
+        Toasty.warning(this@LoginActivity, message, Toasty.LENGTH_SHORT).show()
+    }
+
     private fun validateInput(userId: String, password: String): String? {
         return when {
             userId.isEmpty() || password.isEmpty() -> "Please enter valid credentials"
@@ -122,16 +126,17 @@ class LoginActivity : AppCompatActivity() {
             else -> null
         }
     }
+
     fun login() {
         try {
             // Fetching user credentials from input fields
             val userId = binding.tvusername.text.toString().trim()
-            val password = binding.tvpassword .text.toString().trim()
+            val password = binding.tvpassword.text.toString().trim()
 
             // Validate user input
             val validationMessage = validateInput(userId, password)
             if (validationMessage == null) {
-                val loginRequest = LoginRequest( password, userId )
+                val loginRequest = LoginRequest(password, userId)
                 viewModel.login(Constants.BASE_URL, loginRequest)
             } else {
                 showErrorMessage(validationMessage)

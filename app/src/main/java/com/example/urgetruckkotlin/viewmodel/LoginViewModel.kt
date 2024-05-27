@@ -9,7 +9,7 @@ import com.example.urgetruckkotlin.helper.Constants
 import com.example.urgetruckkotlin.helper.Resource
 import com.example.urgetruckkotlin.helper.Utils
 import com.example.urgetruckkotlin.model.login.LoginRequest
-import com.example.urgetruckkotlin.model.login.LoginResponse
+import com.example.urgetruckkotlin.model.login.LoginResultModel
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -19,7 +19,7 @@ import retrofit2.Response
 class LoginViewModel ( application: Application,
 private val rfidRepository:URGETRUCKRepository
 ) : AndroidViewModel(application) {
-    val loginMutableLiveData: MutableLiveData<Resource<LoginResponse>> = MutableLiveData()
+    val loginMutableLiveData: MutableLiveData<Resource<LoginResultModel>> = MutableLiveData()
     fun login(
         baseUrl: String,
         loginRequest: LoginRequest
@@ -28,7 +28,7 @@ private val rfidRepository:URGETRUCKRepository
             safeAPICallDtmsLogin(baseUrl, loginRequest)
         }
     }
-    private fun handleDtmsUserLoginResponse(response: Response<LoginResponse>): Resource<LoginResponse> {
+    private fun handleDtmsUserLoginResponse(response: Response<LoginResultModel>): Resource<LoginResultModel> {
         var errorMessage = ""
         if (response.isSuccessful) {
             response.body()?.let { Response ->
