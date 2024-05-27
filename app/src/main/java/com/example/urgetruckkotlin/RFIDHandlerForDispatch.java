@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.urgetruckkotlin.view.VehicleDetectionActivity;
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
 import com.zebra.rfid.api3.Antennas;
@@ -48,6 +49,8 @@ public class RFIDHandlerForDispatch implements Readers.RFIDReaderEventHandler {
     // UI and context
     TextView textView;
     private DispatchVehicleActivity context;
+
+    private VehicleDetectionActivity Context;
     // general
     private int MAX_POWER = 30;
     private int POWER_REQUIRED = 50;

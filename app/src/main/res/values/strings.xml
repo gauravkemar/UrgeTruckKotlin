@@ -1,3 +1,24 @@
 <resources>
-    <string name="app_name">UrgeTruckKotlin</string>
+    <string name="app_name">UT HHD</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="vehicle_detection_activity">Vehicle Detection</string>
+    <string name="vehicle_rfidmapping_activity">Vehicle RFID Mapping</string>
+    <string name="security_inspection_activity">Security Inspection</string>
+    <string name="exit_clearance_activity">Exit Clearance</string>
+    <string name="track_vehicle_activity">Track Vehicle</string>
+    <string name="admin">Admin</string>
+    <string name="internet_connection">Please Check Internet Connection</string>
+
+
+    <string-array name="vehicle_detectionreasons">
+        <item>RFID Not Working</item>
+        <item>Power Failure</item>
+        <item>Network Failure</item>
+        <item>New Location</item>
+        <item>Traffic Congestion</item>
+        <item>Other</item>
+    </string-array>
+
 </resources>

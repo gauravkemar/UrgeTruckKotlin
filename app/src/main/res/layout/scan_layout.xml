@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RadioGroup
+            android:id="@+id/rgVehicleDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="15dp"
+            android:gravity="center">
+            <RadioButton
+                android:id="@+id/rbScanRfid"
+                android:checked="true"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Scan RFID"/>
+            <RadioButton
+                android:id="@+id/rbVrn"
+                android:layout_width="wrap_content"
+                android:textSize="15sp"
+                android:layout_height="match_parent"
+                android:text="Enter VRN"/>
+
+        </RadioGroup>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tv_rfid"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Scan RFID"
+            >
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteTextView_rfid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textSize="15sp"
+                android:singleLine="true"
+                android:inputType="none"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_marginTop="32dp"
+            android:layout_width="wrap_content"
+            android:padding="10dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:text="Scan RFID"/>
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:autofillHints="sds"
+            android:visibility="gone"
+                android:background="@drawable/spiiner_bg"
+            android:padding="10dp"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout_vehicleno"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:hint="Enter Vehicle Number">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tvVrn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:maxLength="10"
+                android:inputType="textCapCharacters"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+</layout>
