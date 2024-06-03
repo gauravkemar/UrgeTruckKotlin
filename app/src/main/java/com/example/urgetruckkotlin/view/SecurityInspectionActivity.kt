@@ -41,6 +41,7 @@ import es.dmoral.toasty.Toasty
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 
@@ -54,7 +55,7 @@ class SecurityInspectionActivity : AppCompatActivity(),
     private lateinit var weightDetailsResultModel: WeightDetailsResultModel
     private lateinit var wbResponseModel: ArrayList<WBResponseModel>
     private lateinit var wBListResultModel: WBListResultModel
-    private val files: List<Uri> = ArrayList()
+    private val files: MutableList<Uri> = ArrayList()
     private var auto = true
     private var reason = "Accept"
 
@@ -122,13 +123,13 @@ class SecurityInspectionActivity : AppCompatActivity(),
             }
         })
         populateDropdown()
-        binding.SecurityInspectionLayout.uploadPhotoLayout.ivAddImage.setOnClickListener(View.OnClickListener() { view ->
+        binding.securityInspectionLayout.uploadPhotoLayout.ivAddImage.setOnClickListener(View.OnClickListener() { view ->
             addImage()
         })
         binding.btnScanrfid.setOnClickListener(View.OnClickListener() { view ->
             confirmInput()
         })
-        binding.SecurityInspectionLayout.btnPostSecurityCheck.setOnClickListener(View.OnClickListener() { view ->
+        binding.securityInspectionLayout.btnPostSecurityCheck.setOnClickListener(View.OnClickListener() { view ->
             confirmInputCheck()
         })
 
@@ -146,10 +147,10 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
                                     weightDetailsResultModel = resultResponse
                                     binding.scanLayout.tvVrn.setText(weightDetailsResultModel?.weighmentDetails?.vrn)
-                                    binding.SecurityInspectionLayout.tvOriginalWeight.setText(
+                                    binding.securityInspectionLayout.tvOriginalWeight.setText(
                                         weightDetailsResultModel?.weighmentDetails?.expectedWeight
                                     )
-                                    binding.SecurityInspectionLayout.tvNewWeight.setText(
+                                    binding.securityInspectionLayout.tvNewWeight.setText(
                                         weightDetailsResultModel?.weighmentDetails?.actualWeight
                                     )
 
@@ -249,23 +250,23 @@ class SecurityInspectionActivity : AppCompatActivity(),
                 }
             }
         }
-        binding.SecurityInspectionLayout.radioGroup.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { radioGroup, i ->
+        binding.securityInspectionLayout.radioGroup.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { radioGroup, i ->
             if (radioGroup.checkedRadioButtonId == R.id.rbAccept) {
                 reason = "Accept"
                 auto = true
-                binding.SecurityInspectionLayout.actvWbSelection.setText("")
-                binding.SecurityInspectionLayout.cbWbAllocate.isChecked = true
-                binding.SecurityInspectionLayout.layoutWbSelection.visibility = View.GONE
+                binding.securityInspectionLayout.actvWbSelection.setText("")
+                binding.securityInspectionLayout.cbWbAllocate.isChecked = true
+                binding.securityInspectionLayout.layoutWbSelection.visibility = View.GONE
                 checkstate = true
             } else if (radioGroup.checkedRadioButtonId == R.id.rbReprocess) {
                 reason = "AcceptWithReweighment"
-                binding.SecurityInspectionLayout.layoutWbSelection.visibility = View.GONE
+                binding.securityInspectionLayout.layoutWbSelection.visibility = View.GONE
 
             } else if (radioGroup.checkedRadioButtonId == R.id.rbReject) {
                 reason = "Reject"
                 auto = true
-                binding.SecurityInspectionLayout.actvWbSelection.setText("")
-                binding.SecurityInspectionLayout.layoutWbSelection.visibility = View.GONE
+                binding.securityInspectionLayout.actvWbSelection.setText("")
+                binding.securityInspectionLayout.layoutWbSelection.visibility = View.GONE
 
 
             }
@@ -342,26 +343,26 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
     private fun validateReason(): Boolean {
         val reasonInput: String =
-            binding.SecurityInspectionLayout.textInputLayoutReason.editText.toString()
+            binding.securityInspectionLayout.textInputLayoutReason.editText.toString()
                 .trim { it <= ' ' }
         return if (reasonInput.isEmpty()) {
-            binding.SecurityInspectionLayout.textInputLayoutReason.setError("Please Select a reason")
+            binding.securityInspectionLayout.textInputLayoutReason.setError("Please Select a reason")
             false
         } else {
-            binding.SecurityInspectionLayout.textInputLayoutReason.setError(null)
+            binding.securityInspectionLayout.textInputLayoutReason.setError(null)
             true
         }
     }
 
     private fun validateWb(): Boolean {
         val wbInput =
-            binding.SecurityInspectionLayout.textInputLayoutWbSelection.editText.toString()
+            binding.securityInspectionLayout.textInputLayoutWbSelection.editText.toString()
                 .trim { it <= ' ' }
         return if (wbInput.isEmpty()) {
-            binding.SecurityInspectionLayout.textInputLayoutWbSelection.setError("Please Select a WeighBridge")
+            binding.securityInspectionLayout.textInputLayoutWbSelection.setError("Please Select a WeighBridge")
             false
         } else {
-            binding.SecurityInspectionLayout.textInputLayoutWbSelection.setError(null)
+            binding.securityInspectionLayout.textInputLayoutWbSelection.setError(null)
             true
         }
     }
@@ -512,6 +513,7 @@ class SecurityInspectionActivity : AppCompatActivity(),
         progress.cancel()
     }
 
+
     //upload image
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -521,28 +523,28 @@ class SecurityInspectionActivity : AppCompatActivity(),
                     val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                     val rowView = inflater.inflate(R.layout.image, null)
                     // Add the new row before the add field button.
-                    parentLinearLayout.addView(rowView, parentLinearLayout.childCount - 1)
-                    parentLinearLayout.isFocusable
+                    binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.addView(rowView, binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.childCount - 1)
+                    binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.isFocusable
                     val selectedImage = rowView.findViewById<ImageView>(R.id.number_edit_text)
                     val img = data.extras?.get("data") as Bitmap
                     selectedImage.setImageBitmap(img)
-                    Picasso.get().load(getImageUri(activity!!, img)).into(selectedImage)
-                    val imgPath = FileUtil.getPath(activity!!, getImageUri(activity!!, img))
+                    Picasso.get().load(getImageUri(this!!, img)).into(selectedImage)
+                    val imgPath = FileUtil.getPath(this!!, getImageUri(this!!, img))
                     files.add(Uri.parse(imgPath))
                     Log.e("image", imgPath)
                 }
 
                 1 -> if (resultCode == Activity.RESULT_OK && data != null) {
                     val inflater =
-                        activity?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                        this?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                     val rowView = inflater.inflate(R.layout.image, null)
                     // Add the new row before the add field button.
-                    parentLinearLayout.addView(rowView, parentLinearLayout.childCount - 1)
-                    parentLinearLayout.isFocusable
+                    binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.addView(rowView, binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.childCount - 1)
+                    binding.securityInspectionLayout.uploadPhotoLayout.parentLinearLayout.isFocusable
                     val selectedImage = rowView.findViewById<ImageView>(R.id.number_edit_text)
                     val img = data.data
                     Picasso.get().load(img).into(selectedImage)
-                    val imgPath = FileUtil.getPath(activity!!, img!!)
+                    val imgPath = FileUtil.getPath(this!!, img!!)
                     files.add(Uri.parse(imgPath))
                     Log.e("image", imgPath)
                 }
@@ -550,11 +552,19 @@ class SecurityInspectionActivity : AppCompatActivity(),
         }
     }
 
+    fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
+        val bytes = ByteArrayOutputStream()
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path = MediaStore.Images.Media.insertImage(inContext.contentResolver, inImage, "intuenty", null)
+        Log.d("image uri", path ?: "null")
+        return if (path != null) Uri.parse(path) else null
+    }
+
     fun addImage() {
         if (files.size > 4) {
-            Toast.makeText(activity, "Maximum 5 photos can be uploaded", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Maximum 5 photos can be uploaded", Toast.LENGTH_SHORT).show()
         } else {
-            selectImage(activity!!)
+            selectImage(this!!)
         }
     }
 

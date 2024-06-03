@@ -63,7 +63,7 @@
                     android:layout_height="match_parent">
 
                     <include
-                        android:id="@+id/SecurityInspectionLayout"
+                        android:id="@+id/securityInspectionLayout"
                         layout="@layout/securityinspection_layout" />
 
                 </androidx.core.widget.NestedScrollView>
