@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.example.urgetruckkotlin.R
 import com.example.urgetruckkotlin.databinding.ActivityVehicalDetectionBinding
 import com.example.urgetruckkotlin.helper.RFIDHandlerForVehicleDetection
@@ -23,6 +24,8 @@ import com.example.urgetruckkotlin.helper.Utils
 import com.example.urgetruckkotlin.model.login.vehicalDetection.PostRfidModel
 import com.example.urgetruckkotlin.model.login.vehicalDetection.getLocationList.Location
 import com.example.urgetruckkotlin.model.login.vehicalDetection.getlocationmasterdatabylocationId.GetLocationMasterDataByLocationId
+import com.example.urgetruckkotlin.repository.URGETRUCKRepository
+import com.example.urgetruckkotlin.viewmodel.VehicaDetectionViewFactory
 import com.example.urgetruckkotlin.viewmodel.VehicalDetectionViewModel
 import com.zebra.rfid.api3.TagData
 import es.dmoral.toasty.Toasty
@@ -83,7 +86,9 @@ class VehicleDetectionActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_vehical_detection)
-
+        session = SessionManager(this)
+        progress = ProgressDialog(this)
+        progress.setMessage("Loading...")
         parentLocationMapping = HashMap()
         childLocationMapping = HashMap()
         child2LocationMapping = HashMap()
@@ -91,10 +96,13 @@ class VehicleDetectionActivity : AppCompatActivity(),
         childLocation = ArrayList()
         child2Location = ArrayList()
         TagDataSet = ArrayList()
-
+        val urgeTruckRepository = URGETRUCKRepository()
+        val viewModelProviderFactory =
+            VehicaDetectionViewFactory(application, urgeTruckRepository)
+        viewModel =
+            ViewModelProvider(this, viewModelProviderFactory)[VehicalDetectionViewModel::class.java]
         //inittoolbar
-        progress = ProgressDialog(this)
-        progress.setMessage("Loading...")
+
         binding.layoutToolbar.toolbarText.setText("Vehicle Detection")
         mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
         binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
@@ -207,7 +215,7 @@ class VehicleDetectionActivity : AppCompatActivity(),
                     response.data?.let { resultResponse ->
                         try {
                             if (resultResponse != null) {
-                                findViewById<View>(R.id.progressbar).visibility = View.GONE
+
                                 binding.textInputLayoutChild3.visibility = View.GONE
                                 try {
 
@@ -374,10 +382,11 @@ class VehicleDetectionActivity : AppCompatActivity(),
             }
         }
 
+
         binding.btnVehicledetection.setOnClickListener { view -> confirmInput(view) }
         getParentLocationDefaultData()
-        TagDataSet = ArrayList<String>()
-        defaulReaderOn()
+            TagDataSet = ArrayList<String>()
+            defaulReaderOn()
     }
     private fun setToDefault() {
         getParentLocationDefaultData()
@@ -503,7 +512,7 @@ class VehicleDetectionActivity : AppCompatActivity(),
     }
 
     fun callPostRfidApi() {
-        binding.progressbar.setVisibility(View.VISIBLE)
+
         try {
             if (checkstate) {
                 modal = PostRfidModel(
@@ -511,14 +520,13 @@ class VehicleDetectionActivity : AppCompatActivity(),
                     binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' },
                     selectedChild2LocationId.toString(),
                     "",
-                    binding.autoCompleteTextViewReason.text.toString().trim()
-                )
+                    binding.autoCompleteTextViewReason.text.toString().trim(),)
             } else {
                 modal = PostRfidModel(
                     "123456",
                     "",
                     selectedChild2LocationId.toString(),
-                    binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' },
+                    binding.scanLayout.tvVrn.text.toString().trim(),
                     binding.autoCompleteTextViewReason.text.toString().trim()
                 )
             }
@@ -601,7 +609,6 @@ class VehicleDetectionActivity : AppCompatActivity(),
         }
     }
     ////rfid handle
-
     override fun onResume() {
         super.onResume()
 
@@ -615,6 +622,7 @@ class VehicleDetectionActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
         binding.unbind()
+
         if (isRFIDInit) {
             rfidHandler!!.onDestroy()
         }
@@ -649,6 +657,8 @@ class VehicleDetectionActivity : AppCompatActivity(),
         rfidHandler!!.stopInventory()
     }
 
+
+
     override fun handleTriggerPress(pressed: Boolean) {
         if (pressed) {
             performInventory()
@@ -661,7 +671,7 @@ class VehicleDetectionActivity : AppCompatActivity(),
         runOnUiThread {
             var tagDataFromScan = tagData[0].tagID
             mediaPlayer?.start()
-            if (tagDataFromScan.startsWith("E200")) {
+
                 //binding.tvBarcode.setText(tagDataFromScan)
                 //Log.e(TAG, "RFID Data : $tagDataFromScan")
                 binding.scanLayout.autoCompleteTextViewRfid.setText(tagData[0].tagID.toString())
@@ -688,7 +698,7 @@ class VehicleDetectionActivity : AppCompatActivity(),
                         adapter1
                     )
                 }
-            }
+
         }
     }
 

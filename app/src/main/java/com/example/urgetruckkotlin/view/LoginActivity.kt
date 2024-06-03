@@ -137,7 +137,10 @@ class LoginActivity : AppCompatActivity() {
             val validationMessage = validateInput(userId, password)
             if (validationMessage == null) {
                 val loginRequest = LoginRequest(password, userId)
-                viewModel.login(Constants.BASE_URL, loginRequest)
+                val baseurl = Utils.getSharedPrefs(this@LoginActivity, "apiurl")
+                viewModel.login(baseurl.toString(), loginRequest)
+
+
             } else {
                 showErrorMessage(validationMessage)
             }

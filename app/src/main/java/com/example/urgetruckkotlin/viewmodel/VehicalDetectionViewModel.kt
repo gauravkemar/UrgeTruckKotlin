@@ -202,7 +202,7 @@ class VehicalDetectionViewModel(
                 JSONObject(it.charStream().readText())
             }
             errorObject?.let {
-                errorMessage = it.getString(Constants.HTTP_ERROR_MESSAGE)
+
             }
         }
         return Resource.Error(errorMessage)

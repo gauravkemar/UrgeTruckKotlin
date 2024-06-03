@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -38,9 +39,9 @@ class HomeActivity : AppCompatActivity() {
         val layout_toolbar = findViewById<View>(R.id.layout_toolbar)
         val settingBtn = layout_toolbar.findViewById<ImageView>(R.id.ivRightSettings)
          binding.layoutToolbar.ivLeftToolbar.visibility=View.VISIBLE
-        binding.layoutToolbar.ivLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
+         binding.layoutToolbar.ivLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
          binding .layoutToolbar.ivRightToolbar.visibility=View.VISIBLE
-        binding .layoutToolbar.ivRightToolbar.setOnClickListener { view: View? -> showLogoutDialog()}
+         binding .layoutToolbar.ivRightToolbar.setOnClickListener { view: View? ->      showLogoutDialog()}
 
 
 
@@ -48,19 +49,19 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this@HomeActivity,VehicleDetectionActivity::class.java))
         }
         binding.cardviewTagfid.setOnClickListener {
-            startActivity(Intent(this@HomeActivity,VehicleRfidMappingActivity::class.java))
+            startActivity(Intent(this@HomeActivity,VehicalRifdMappingActivity::class.java))
         }
-        binding.cardviewTagfid.setOnClickListener {
-            startActivity(Intent(this@HomeActivity,VehicleRfidMappingActivity::class.java))
+        binding.cardviewSecuritycheck.setOnClickListener {
+            startActivity(Intent(this@HomeActivity,SecurityInspectionActivity::class.java))
         }
-        binding.cardviewTagfid.setOnClickListener {
-            startActivity(Intent(this@HomeActivity,VehicleRfidMappingActivity::class.java))
+        binding.cardviewPhysicalcheck.setOnClickListener {
+            startActivity(Intent(this@HomeActivity,ExitClearanceNewActivity::class.java))
         }
-        binding.cardviewTagfid.setOnClickListener {
-            startActivity(Intent(this@HomeActivity,VehicleRfidMappingActivity::class.java))
+        binding.cardviewTrack.setOnClickListener {
+            startActivity(Intent(this@HomeActivity,TrackVehicleActivity::class.java))
         }
-        binding.cardviewTagfid.setOnClickListener {
-            startActivity(Intent(this@HomeActivity,VehicleRfidMappingActivity::class.java))
+        binding.cardviewStartInvoice.setOnClickListener {
+            startActivity(Intent(this@HomeActivity,AdminActivity::class.java))
         }
 
 
@@ -77,12 +78,7 @@ class HomeActivity : AppCompatActivity() {
         toolbarText.setText(Utils.getSharedPrefs(this, "username"))
 
         settingBtn.setOnClickListener {
-            startActivity(
-                Intent(
-                    this@HomeActivity,
-                    LoginActivity::class.java
-                )
-            )
+       showLogoutDialog()
         }
 
 
@@ -97,6 +93,7 @@ class HomeActivity : AppCompatActivity() {
         builder.setTitle("Logout")
             .setMessage("Are you sure you want to log out?")
             .setPositiveButton("Yes") { dialog, which ->
+
                 logout()
             }
             .setNegativeButton("Cancel") { dialog, which ->

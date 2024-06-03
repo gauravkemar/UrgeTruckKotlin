@@ -1,5 +1,7 @@
 package com.example.urgetruckkotlin.helper
 
+import retrofit2.http.GET
+
 object Constants {
     const val GET = 1
     const val POST = 2
@@ -20,7 +22,7 @@ object Constants {
     const val HTTP_ERROR_MESSAGE = "message"
     const val KEY_USER_NAME = "username"
     const val KEY_USER_FIRST_NAME = "firstName"
-    const val KEY_USER_LAST_NAME= "lastName"
+    const val KEY_USER_LAST_NAME = "lastName"
     const val KEY_USER_EMAIL = "email"
     const val KEY_USER_MOBILE_NUMBER = "mobileNumber"
     const val ROLE_NAME = "roleName"
@@ -31,8 +33,7 @@ object Constants {
     const val SESSION_EXPIRE = "Session Expired ! Please relogin"
     const val LOGGEDIN = "loggedIn"
     const val LOCATION_ID = "locationId"
-    const val Key_USER_TOKEn="token"
-
+    const val Key_USER_TOKEn = "token"
 
 
     //const val BASE_URL = "http://103.240.90.141:80/Service/api/"
@@ -44,8 +45,11 @@ object Constants {
     const val GET_LOCATION_DEFAULT = "GetLocationList"
     const val GET_LOCATION_LIST = "GetLocationList"
 
-    const val GET_LOCATION_MASTER_DATA_BY_LOCATION_ID="GetLocationMasterDataByLocationId"
-    const val POST_RFId="POSTRFIDTag"
+    const val GET_LOCATION_MASTER_DATA_BY_LOCATION_ID = "GetLocationMasterDataByLocationId"
+    const val POST_RFId = "POSTRFIDTag"
+    const val Post_RFIDMAPPING = "PostRFIDVerifyMap"
+    const val GET_ALL_WEIGHBRIDGE_LIST = "GetAllWeighBridgeList"
+    const val GET_WEIGHMENT_DETAILS = "GetWeighmentDetails"
 
 
 }

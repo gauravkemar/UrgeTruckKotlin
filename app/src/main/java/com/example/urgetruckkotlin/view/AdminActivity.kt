@@ -13,11 +13,13 @@ import com.example.urgetruckkotlin.R
 import com.example.urgetruckkotlin.databinding.ActivityAdminBinding
 import com.example.urgetruckkotlin.helper.SessionManager
 import com.example.urgetruckkotlin.helper.Utils
-import com.google.android.ads.mediationtestsuite.activities.HomeActivity
+
 
 class AdminActivity : AppCompatActivity() {
     lateinit var binding: ActivityAdminBinding
     private lateinit var session: SessionManager
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +33,13 @@ class AdminActivity : AppCompatActivity() {
 
         val ivLogo: ImageView = layout_toolbar.findViewById<ImageView>(R.id.ivLogoLeftToolbar)
         ivLogo.visibility = View.VISIBLE
+
+
+
+
+        binding.edServerIp.setText(Utils.getSharedPrefs(this, "apiurl"))
+        binding.tvantenna . setText(Utils.getSharedPrefs(this, "antennapower"))
+
 
         binding.btAntenna.setOnClickListener { checkinputAntenna() }
         binding.btSubmit.setOnClickListener { checkinputUrl() }
@@ -83,7 +92,7 @@ class AdminActivity : AppCompatActivity() {
             binding.textinputantenna.setError("Entered Antenna Power Should be less than 300")
         } else {
 
-            Utils.getSharedPrefs(this@AdminActivity, "antennapower", antenna)
+            Utils.setSharedPrefs(this@AdminActivity, "antennapower", antenna)
 
             session.showCustomDialogFinish(
                 this@AdminActivity,
