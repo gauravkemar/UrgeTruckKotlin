@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
 
-class WbDetailViewModelFactory (
+class TrackVehicalDetailsFactory (
     private val application: Application,
     private val rfidRepository: URGETRUCKRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return WbDetailsViewModel(application,rfidRepository) as T
+        return TrackVehicleDetailsViewModel(application,rfidRepository) as T
     }
 }

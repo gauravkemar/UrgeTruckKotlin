@@ -1,6 +1,7 @@
 package com.example.urgetruckkotlin.helper
 
 import retrofit2.http.GET
+import retrofit2.http.POST
 
 object Constants {
     const val GET = 1
@@ -50,6 +51,8 @@ object Constants {
     const val Post_RFIDMAPPING = "PostRFIDVerifyMap"
     const val GET_ALL_WEIGHBRIDGE_LIST = "GetAllWeighBridgeList"
     const val GET_WEIGHMENT_DETAILS = "GetWeighmentDetails"
+    const val POST_VEHICAL_TRACKING_REQUEST="PostVehicleTrackingRequest"
+
 
 
 }

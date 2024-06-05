@@ -5,30 +5,44 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.urgetruckkotlin.R
-import com.example.urgetruckkotlin.databinding.ActivityExitClearanceNewBinding
+import com.example.urgetruckkotlin.adapter.TrackVehicleRecyclerView
 import com.example.urgetruckkotlin.databinding.ActivityTrackVehicleBinding
-import com.example.urgetruckkotlin.databinding.ActivityVehicalDetectionBinding
-import com.example.urgetruckkotlin.helper.RFIDHandlerForExiteClearance
 import com.example.urgetruckkotlin.helper.RFIDHandlerForTrackVehical
-import com.example.urgetruckkotlin.helper.RFIDHandlerForVehicleDetection
+import com.example.urgetruckkotlin.helper.Resource
 import com.example.urgetruckkotlin.helper.SessionManager
+import com.example.urgetruckkotlin.helper.Utils
+import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
+import com.example.urgetruckkotlin.model.trackVehical.JobMilestone
+import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleModel
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
+import com.example.urgetruckkotlin.viewmodel.TrackVehicalDetailsFactory
+import com.example.urgetruckkotlin.viewmodel.TrackVehicleDetailsViewModel
+import com.example.urgetruckkotlin.viewmodel.WbDetailViewModelFactory
+import com.example.urgetruckkotlin.viewmodel.WbDetailsViewModel
 import com.zebra.rfid.api3.TagData
+import es.dmoral.toasty.Toasty
 
 class TrackVehicleActivity : AppCompatActivity(),
-    RFIDHandlerForTrackVehical.ResponseHandlerInterface{
+    RFIDHandlerForTrackVehical.ResponseHandlerInterface {
     lateinit var binding: ActivityTrackVehicleBinding
     lateinit var TagDataSet: ArrayList<String>
+
     private lateinit var session: SessionManager
+    private var checkstate = true
+    private lateinit var viewModel: TrackVehicleDetailsViewModel
 
     //rfid
+    private val RfidValue = ""
     private var mediaPlayer: MediaPlayer? = null
     var rfidHandler: RFIDHandlerForTrackVehical? = null
     var isRFIDInit = false
@@ -45,16 +59,27 @@ class TrackVehicleActivity : AppCompatActivity(),
             isRFIDInit = true
             Thread.sleep(1000)
             initReader()
-        }}
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_track_vehicle)
         session = SessionManager(this)
         progress = ProgressDialog(this)
         progress.setMessage("Loading...")
+
+        binding.scanLayout.autoCompleteTextViewRfid.setText(RfidValue)
         TagDataSet = ArrayList()
+
         val urgeTruckRepository = URGETRUCKRepository()
-        binding.layoutToolbar.toolbarText.setText("Vehicle Detection")
+        val viewModelProviderFactory =
+            TrackVehicalDetailsFactory(application, urgeTruckRepository)
+        viewModel = ViewModelProvider(
+            this,
+            viewModelProviderFactory
+        )[TrackVehicleDetailsViewModel::class.java]
+        binding.layoutToolbar.toolbarText.setText("Track Vehical")
         mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
         binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
         binding.layoutToolbar.ivLogoLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
@@ -67,12 +92,171 @@ class TrackVehicleActivity : AppCompatActivity(),
             )
             finishAffinity()
         }
+        TagDataSet = ArrayList<String>()
         defaulReaderOn()
+        binding.trackVehicalLayout.rvTrackVehicle.setHasFixedSize(true)
+
+        binding.trackVehicalLayout.rvTrackVehicle.layoutManager = LinearLayoutManager(this)
+        binding.btnScanrfid.setOnClickListener(View.OnClickListener() { view ->
+            confirmInput()
+        })
+        binding.scanLayout.rgVehicleDetails.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { radioGroup, i ->
+            if (radioGroup.checkedRadioButtonId == R.id.rbScanRfid) {
+                binding.scanLayout.textInputLayoutVehicleno.setVisibility(View.GONE)
+                binding.scanLayout.tvVrn.setText("")
+                binding.scanLayout.tvRfid.setError("")
+                binding.scanLayout.tvRfid.setVisibility(View.VISIBLE)
+                checkstate = true
+            } else if (radioGroup.checkedRadioButtonId == R.id.rbVrn) {
+                binding.scanLayout.textInputLayoutVehicleno.setError("")
+                binding.scanLayout.textInputLayoutVehicleno.setVisibility(View.VISIBLE)
+                binding.scanLayout.autoCompleteTextViewRfid.setText("")
+                binding.scanLayout.tvRfid.setVisibility(View.GONE)
+                checkstate = false
+            }
+        })
+        //APi
+        viewModel.getVehicleTrackingDetailsMutableLiveData.observe(this) { response ->
+            when (response) {
+
+                is Resource.Success -> {
+                    binding.clScan.visibility = View.GONE
+                    binding.clDisplay.visibility = View.VISIBLE
+                    hideProgressBar()
+                    response.data?.let { resultResponse ->
+                        try {
+                            if (resultResponse != null) {
+                                try {
+                                    binding.scanLayout.tvVrn.append(
+                                        resultResponse.vehicleTransactionDetails.vrn
+                                    )
+                                    binding.trackVehicalLayout.tvDriverName.append(
+
+                                        resultResponse.vehicleTransactionDetails.driverName
+
+                                    )
+                                    binding.trackVehicalLayout.tvtxn.append(
+                                        resultResponse.vehicleTransactionDetails.vehicleTransactionCode
+
+                                    )
+                                    if (resultResponse.vehicleTransactionDetails.tranType == 1
+
+                                    ) {
+                                        binding.trackVehicalLayout.tvtransaction.append("Outbound")
+                                    } else if (resultResponse.vehicleTransactionDetails.tranType === 2
+                                    ) {
+                                        binding.trackVehicalLayout.tvtransaction.append("Inbound")
+                                    } else if (
+                                        resultResponse.vehicleTransactionDetails.tranType === 3
+                                    ) {
+                                        binding.trackVehicalLayout.tvtransaction.append("Internal")
+                                    }
+                                    val milestones: List<JobMilestone> =
+                                        resultResponse.vehicleTransactionDetails.jobMilestones
+
+
+                                    //Collections.reverse(milestones);
+                                    //Collections.reverse(milestones);
+                                    val adapter = TrackVehicleRecyclerView(
+                                        this,
+                                        milestones
+                                    )
+                                    binding.trackVehicalLayout.rvTrackVehicle.adapter=adapter
+                                } catch (e: Exception) {
+                                    Utils.showCustomDialog(
+                                        this@TrackVehicleActivity,
+                                        "Exception: No Data Found"
+                                    )
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Toasty.warning(
+                                this@TrackVehicleActivity,
+                                e.printStackTrace().toString(),
+                                Toasty.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+
+                is Resource.Error -> {
+                    hideProgressBar()
+                    response.message?.let { errorMessage ->
+                        Toasty.error(
+                            this@TrackVehicleActivity   ,
+                            "failed - \nError Message: $errorMessage"
+                        ).show()
+                        Utils.showCustomDialogFinish(this, errorMessage)
+                    }
+                }
+
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
+            }
+        }
+
 
     }
+
+    private fun confirmInput() {
+        if (binding.clScan.visibility == View.VISIBLE) {
+            if (validateRFIDorVRN()) {
+
+                 callgetVehicaltDetailsApi()
+
+            }
+        }
+    }
+
+    fun callgetVehicaltDetailsApi() {
+        val baseurl: String = Utils.getSharedPrefs(this, "apiurl").toString()
+        var edRfid = binding.scanLayout.autoCompleteTextViewRfid.toString().trim()
+        var edVrm = binding.scanLayout.tvVrn.toString().trim()
+        try {
+            if (checkstate) {
+                viewModel.getTrackVehicleDetails(
+                    "",
+                    baseurl,
+                    TrackVehicleModel("12345566", edRfid, "")
+                )  //Rfid
+
+            } else {
+                viewModel.getTrackVehicleDetails(
+                    "",
+                    baseurl,
+                    TrackVehicleModel("12345566", "", edVrm)
+                )
+            }
+            val baseurl: String =
+                Utils.getSharedPrefs(this@TrackVehicleActivity, "apiurl").toString()
+
+        } catch (e: Exception) {
+
+        }
+    }
+
+    private fun validateRFIDorVRN(): Boolean {
+        val scanRFIDInput = binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' }
+        val vrnInput = binding.scanLayout.textInputLayoutVehicleno.editText
+            .toString().trim { it <= ' ' }
+        if (binding.scanLayout.rbScanRfid.isChecked() && scanRFIDInput.isEmpty()) {
+            binding.scanLayout.tvRfid.setError("Press trigger to Scan RFID")
+            return false
+        } else if (binding.scanLayout.rbVrn.isChecked() && vrnInput.isEmpty()) {
+            binding.scanLayout.textInputLayoutVehicleno.setError("Please enter VRN")
+            return false
+        } else if (binding.scanLayout.rbVrn.isChecked() && vrnInput.length < 8) {
+            binding.scanLayout.textInputLayoutVehicleno.setError("Please enter 8 to 10 digits VRN")
+            return false
+        }
+        return true
+    }
+
     private fun setToDefault() {
         TagDataSet.clear()
     }
+
     ////rfid handle
     override fun onResume() {
         super.onResume()
@@ -121,7 +305,6 @@ class TrackVehicleActivity : AppCompatActivity(),
     fun stopInventory() {
         rfidHandler!!.stopInventory()
     }
-
 
 
     override fun handleTriggerPress(pressed: Boolean) {

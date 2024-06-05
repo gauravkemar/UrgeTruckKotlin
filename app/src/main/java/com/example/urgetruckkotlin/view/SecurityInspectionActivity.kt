@@ -20,9 +20,9 @@ import android.widget.AutoCompleteTextView
 import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.Toast
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.example.urgetruckkotlin.R
 import com.example.urgetruckkotlin.databinding.ActivitySecurityInspectionBinding
 import com.example.urgetruckkotlin.helper.FileUtil
@@ -33,14 +33,19 @@ import com.example.urgetruckkotlin.helper.Utils
 import com.example.urgetruckkotlin.model.securityInspection.WBListResultModel
 import com.example.urgetruckkotlin.model.securityInspection.WBResponseModel
 import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
+import com.example.urgetruckkotlin.repository.URGETRUCKRepository
+import com.example.urgetruckkotlin.viewmodel.VehicaDetectionViewFactory
+import com.example.urgetruckkotlin.viewmodel.WbDetailViewModelFactory
 import com.example.urgetruckkotlin.viewmodel.WbDetailsViewModel
 import com.example.urgetruckkotlin.viewmodel.WbListViewModel
+import com.example.urgetruckkotlin.viewmodel.WblistViewModelFactory
 import com.squareup.picasso.Picasso
 import com.zebra.rfid.api3.TagData
 import es.dmoral.toasty.Toasty
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.http.Part
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -51,11 +56,12 @@ class SecurityInspectionActivity : AppCompatActivity(),
     private lateinit var session: SessionManager
     private lateinit var viewModel: WbDetailsViewModel
     private lateinit var viewModel1: WbListViewModel
+    private val RfidValue = ""
     private var checkstate = true
     private lateinit var weightDetailsResultModel: WeightDetailsResultModel
     private lateinit var wbResponseModel: ArrayList<WBResponseModel>
     private lateinit var wBListResultModel: WBListResultModel
-    private val files: MutableList<Uri> = ArrayList()
+    private var files: MutableList<Uri> = ArrayList()
     private var auto = true
     private var reason = "Accept"
 
@@ -80,8 +86,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
         }
     }
 
-    //UPLOAD iMAGE
-    val list: MutableList<MultipartBody.Part> = ArrayList()
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,13 +95,26 @@ class SecurityInspectionActivity : AppCompatActivity(),
         binding = DataBindingUtil.setContentView(this, R.layout.activity_security_inspection)
         session = SessionManager(this)
         TagDataSet = ArrayList()
+        progress = ProgressDialog(this)
+        progress.setMessage("Loading...")
+
+        binding.scanLayout.autoCompleteTextViewRfid.setText(RfidValue)
+        val urgeTruckRepository = URGETRUCKRepository()
+        val viewModelProviderFactory =
+            WbDetailViewModelFactory(application, urgeTruckRepository)
+        viewModel = ViewModelProvider(this, viewModelProviderFactory)[WbDetailsViewModel::class.java]
+        val viewModelProviderFactory1 =
+            WblistViewModelFactory(application, urgeTruckRepository)
+        viewModel1 = ViewModelProvider(this, viewModelProviderFactory1)[WbListViewModel::class.java]
+
 
         //inittoolbar
-        binding.layoutToolbar.toolbarText.setText("Vehicle Detection")
+        binding.layoutToolbar.toolbarText.setText("vehical RFID Mapping")
         mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
         binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
         binding.layoutToolbar.ivLogoLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
         binding.layoutToolbar.ivLogoLeftToolbar.setOnClickListener { view: View? ->
+
             startActivity(
                 Intent(
                     this@SecurityInspectionActivity,
@@ -114,7 +133,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
                 binding.scanLayout.tvRfid.setError("")
                 binding.scanLayout.tvRfid.setVisibility(View.VISIBLE)
                 checkstate = true
-            } else if (radioGroup.checkedRadioButtonId == R.id.rbVrn) {
+            }
+            else if (radioGroup.checkedRadioButtonId == R.id.rbVrn) {
                 binding.scanLayout.textInputLayoutVehicleno.setError("")
                 binding.scanLayout.textInputLayoutVehicleno.setVisibility(View.VISIBLE)
                 binding.scanLayout.autoCompleteTextViewRfid.setText("")
@@ -144,7 +164,6 @@ class SecurityInspectionActivity : AppCompatActivity(),
                         try {
                             if (resultResponse != null) {
                                 try {
-
                                     weightDetailsResultModel = resultResponse
                                     binding.scanLayout.tvVrn.setText(weightDetailsResultModel?.weighmentDetails?.vrn)
                                     binding.securityInspectionLayout.tvOriginalWeight.setText(
@@ -153,7 +172,6 @@ class SecurityInspectionActivity : AppCompatActivity(),
                                     binding.securityInspectionLayout.tvNewWeight.setText(
                                         weightDetailsResultModel?.weighmentDetails?.actualWeight
                                     )
-
 
                                 } catch (e: Exception) {
                                     Utils.showCustomDialog(
@@ -174,8 +192,6 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
                 is Resource.Error -> {
                     hideProgressBar()
-
-
                     response.message?.let { errorMessage ->
                         Toasty.error(
                             this@SecurityInspectionActivity,
@@ -277,8 +293,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
 
     private fun validateRFIDorVRN(): Boolean {
-        val scanRFIDInput: String = binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' }
-        val vrnInput: String = binding.scanLayout.textInputLayoutVehicleno.editText
+        val scanRFIDInput = binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' }
+        val vrnInput= binding.scanLayout.textInputLayoutVehicleno.editText
             .toString().trim { it <= ' ' }
         if (binding.scanLayout.rbScanRfid.isChecked() && scanRFIDInput.isEmpty()) {
             binding.scanLayout.tvRfid.setError("Press trigger to Scan RFID")
@@ -324,21 +340,11 @@ class SecurityInspectionActivity : AppCompatActivity(),
             return
         }
 
+        uploadImages()
 
-        // callPostSecurityCheck(v);
-//        requestPermission()
-//        uploadImages()
     }
 
-//    private fun uploadImages() {
-//        val list = ArrayList<MultipartBody.Part>()
-//
-//        for (uri in files) {
-//            Log.i("uris", uri.path)
-//            list.add(prepareFilePart("file", uri))
-//        }
-//
-//    }
+
 
 
     private fun validateReason(): Boolean {
@@ -370,11 +376,18 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
     //scan rfid
     private fun confirmInput() {
-        if (validateRFIDorVRN()) {
-            return
-        } else {
-            callgetWeightDetailsApi()
+
+        if (binding.clScan.visibility== View.VISIBLE)
+        {
+            if (validateRFIDorVRN()) {
+
+                callgetWeightDetailsApi()
+
+            }
+        }else if (binding.clWeight.visibility== View.VISIBLE){
+            confirmInputCheck()
         }
+
     }
 
 
@@ -384,10 +397,11 @@ class SecurityInspectionActivity : AppCompatActivity(),
         var edVrm = binding.scanLayout.tvVrn.toString().trim()
         try {
             if (checkstate) {
+
                 viewModel.getWeightDetails("", baseurl, 123456789, edRfid, "")
 
             } else {
-                viewModel.getWeightDetails("", baseurl, 123456789, edVrm, "")
+                viewModel.getWeightDetails("", baseurl, 123456789, "", edVrm)
             }
             val baseurl: String =
                 Utils.getSharedPrefs(this@SecurityInspectionActivity, "apiurl").toString()
@@ -607,6 +621,16 @@ class SecurityInspectionActivity : AppCompatActivity(),
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), file)
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+    }
+    private fun uploadImages() {
+        var list: MutableList<MultipartBody.Part> = ArrayList()
+        for (u in files)
+        {
+            list.add(prepareFilePart("file", u));
+        }
+
+
+
     }
 
 }

@@ -10,6 +10,6 @@ class WblistViewModelFactory(
     private val rfidRepository: URGETRUCKRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return WbDetailsViewModel(application,rfidRepository) as T
+        return WbListViewModel(application,rfidRepository) as T
     }
 }

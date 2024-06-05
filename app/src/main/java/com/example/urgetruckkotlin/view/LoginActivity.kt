@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.urgetruckkotlin.MainActivity
 import com.example.urgetruckkotlin.R
 import com.example.urgetruckkotlin.databinding.ActivityLoginBinding
-import com.example.urgetruckkotlin.helper.Constants
 import com.example.urgetruckkotlin.helper.Constants.KEY_ISLOGGEDIN
 import com.example.urgetruckkotlin.helper.Resource
 import com.example.urgetruckkotlin.helper.SessionManager
@@ -36,6 +35,10 @@ class LoginActivity : AppCompatActivity() {
         val viewModelProviderFactory = LoginViewmodelFactory(application, urgeTruckRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory)[LoginViewModel::class.java]
         session = SessionManager(this)
+        if (Utils.getSharedPrefs(this, "token") !== "") {
+            startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+            finish()
+        }
         binding.buttonLogin.setOnClickListener {
 
             if (binding.tvusername.text.toString()

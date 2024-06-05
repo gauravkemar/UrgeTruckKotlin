@@ -6,9 +6,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.TrackVehicleActivity">
-        <include
-            android:id="@+id/layout_toolbar"
+       >
+        <include android:id="@+id/layout_toolbar"
             layout="@layout/toolbar_view" />
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clScan"
@@ -44,8 +43,25 @@
             </RelativeLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clDisplay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/trackVehicalLayout"
+                layout="@layout/fragment_track_vehicle" />
+            </androidx.core.widget.NestedScrollView>
+
+            </RelativeLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

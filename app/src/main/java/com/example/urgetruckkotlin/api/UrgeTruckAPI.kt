@@ -9,6 +9,7 @@ import com.example.urgetruckkotlin.helper.Constants.GET_WEIGHMENT_DETAILS
 import com.example.urgetruckkotlin.helper.Constants.HTTP_HEADER_AUTHORIZATION
 import com.example.urgetruckkotlin.helper.Constants.LOGIN_URL
 import com.example.urgetruckkotlin.helper.Constants.POST_RFId
+import com.example.urgetruckkotlin.helper.Constants.POST_VEHICAL_TRACKING_REQUEST
 import com.example.urgetruckkotlin.helper.Constants.Post_RFIDMAPPING
 import com.example.urgetruckkotlin.model.login.LoginRequest
 import com.example.urgetruckkotlin.model.login.LoginResultModel
@@ -19,6 +20,8 @@ import com.example.urgetruckkotlin.model.login.vehicalDetection.getlocationmaste
 import com.example.urgetruckkotlin.model.securityInspection.WBResponseModel
 import com.example.urgetruckkotlin.model.securityInspection.WeighmentDetails
 import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
+import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleModel
+import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleResultModel
 import com.example.urgetruckkotlin.model.vehicalMapping.RfidMappingModel
 import com.example.urgetruckkotlin.model.vehicalMapping.RfidMappingResultModel
 import retrofit2.Response
@@ -84,9 +87,19 @@ interface UrgeTruckAPI {
     suspend fun getWeightDetails(
         @Header(HTTP_HEADER_AUTHORIZATION) token: String?,
         @Query("RequestId") requestId: Int?,
-        @Query("RFIDTagNo") rfid:String?,
-        @Query("VRN")vrn:String?
+        @Query("RFIDTagNo") rfid: String?,
+        @Query("VRN") vrn: String?
     ): Response<WeightDetailsResultModel>
+
+    //Track Vehical
+    @POST(POST_VEHICAL_TRACKING_REQUEST)
+    suspend fun getTrackVehicleDetails(
+        @Header(HTTP_HEADER_AUTHORIZATION) token: String?,
+        @Body trackVehicleModel: TrackVehicleModel,
+//        @Query("RequestId") requestId: Int?,
+//        @Query("RFIDTagNo") rfid: String?,
+//        @Query("VRN") vrn: String?
+    ): Response<TrackVehicleResultModel>
 
 
 }
