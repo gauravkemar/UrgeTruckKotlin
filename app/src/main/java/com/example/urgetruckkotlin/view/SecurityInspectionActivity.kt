@@ -109,10 +109,10 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
 
         //inittoolbar
-        binding.layoutToolbar.toolbarText.setText("vehical RFID Mapping")
-        mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
-        binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
-        binding.layoutToolbar.ivLogoLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
+        val layout_toolbar = findViewById<View>(R.id.layout_toolbar)
+        val settingBtn = layout_toolbar.findViewById<ImageView>(R.id.ivRightSettings)
+        binding.layoutToolbar.ivLeftToolbar.visibility=View.VISIBLE
+        binding.layoutToolbar.ivLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
         binding.layoutToolbar.ivLogoLeftToolbar.setOnClickListener { view: View? ->
 
             startActivity(
@@ -393,8 +393,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
     fun callgetWeightDetailsApi() {
         val baseurl: String = Utils.getSharedPrefs(this, "apiurl").toString()
-        var edRfid = binding.scanLayout.autoCompleteTextViewRfid.toString().trim()
-        var edVrm = binding.scanLayout.tvVrn.toString().trim()
+        var edRfid = binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim()
+        var edVrm = binding.scanLayout.tvVrn.text.toString().trim()
         try {
             if (checkstate) {
 

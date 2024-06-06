@@ -517,17 +517,19 @@ class VehicleDetectionActivity : AppCompatActivity(),
             if (checkstate) {
                 modal = PostRfidModel(
                     "123456",
-                    binding.scanLayout.tvRfid.editText.toString().trim { it <= ' ' },
+                    binding.scanLayout.autoCompleteTextViewRfid.getText().toString().trim(),
                     selectedChild2LocationId.toString(),
                     "",
-                    binding.autoCompleteTextViewReason.text.toString().trim(),)
+                    binding.autoCompleteTextViewReason.text.toString().trim(),
+                )
             } else {
+//               var edVrn= binding.scanLayout.tvVrn.getText()
                 modal = PostRfidModel(
                     "123456",
                     "",
                     selectedChild2LocationId.toString(),
-                    binding.scanLayout.tvVrn.text.toString().trim(),
-                    binding.autoCompleteTextViewReason.text.toString().trim()
+                  binding.scanLayout.tvVrn.getText().toString().trim (),
+        binding.autoCompleteTextViewReason.text.toString().trim()
                 )
             }
             val baseurl: String =

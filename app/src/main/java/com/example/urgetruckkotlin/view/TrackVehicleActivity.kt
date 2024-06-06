@@ -68,18 +68,7 @@ class TrackVehicleActivity : AppCompatActivity(),
         session = SessionManager(this)
         progress = ProgressDialog(this)
         progress.setMessage("Loading...")
-
-        binding.scanLayout.autoCompleteTextViewRfid.setText(RfidValue)
-        TagDataSet = ArrayList()
-
-        val urgeTruckRepository = URGETRUCKRepository()
-        val viewModelProviderFactory =
-            TrackVehicalDetailsFactory(application, urgeTruckRepository)
-        viewModel = ViewModelProvider(
-            this,
-            viewModelProviderFactory
-        )[TrackVehicleDetailsViewModel::class.java]
-        binding.layoutToolbar.toolbarText.setText("Track Vehical")
+        binding.layoutToolbar.toolbarText.setText("Security Inspection")
         mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
         binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
         binding.layoutToolbar.ivLogoLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)
@@ -92,6 +81,17 @@ class TrackVehicleActivity : AppCompatActivity(),
             )
             finishAffinity()
         }
+        binding.scanLayout.autoCompleteTextViewRfid.setText(RfidValue)
+        TagDataSet = ArrayList()
+
+        val urgeTruckRepository = URGETRUCKRepository()
+        val viewModelProviderFactory =
+            TrackVehicalDetailsFactory(application, urgeTruckRepository)
+        viewModel = ViewModelProvider(
+            this,
+            viewModelProviderFactory
+        )[TrackVehicleDetailsViewModel::class.java]
+
         TagDataSet = ArrayList<String>()
         defaulReaderOn()
         binding.trackVehicalLayout.rvTrackVehicle.setHasFixedSize(true)

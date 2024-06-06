@@ -54,7 +54,7 @@ class ExitClearanceNewActivity : AppCompatActivity() ,
         progress.setMessage("Loading...")
         TagDataSet = ArrayList()
         val urgeTruckRepository = URGETRUCKRepository()
-        binding.layoutToolbar.toolbarText.setText("Exit Clearance")
+        binding.layoutToolbar.toolbarText.setText("ExitClearance")
         mediaPlayer = MediaPlayer.create(this, R.raw.scanner_sound)
         binding.layoutToolbar.ivLogoLeftToolbar.visibility = View.VISIBLE
         binding.layoutToolbar.ivLogoLeftToolbar.setImageResource(R.drawable.ut_logo_with_outline)

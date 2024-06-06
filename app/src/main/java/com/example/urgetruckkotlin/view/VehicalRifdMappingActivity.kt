@@ -227,21 +227,21 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
                 modal = RfidMappingModel(
                     "123456",
                     "",
-                    binding.scanLayout.autoCompleteTextViewRfid.getText().toString().trim { it <= ' ' },
+                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
                     "False"
                 )
             } else if (binding.btnVehicleMapping.getText() == "Map" && b) {
                 modal = RfidMappingModel(
                     "123456",
-                   binding.scanLayout.tvVrn.getText().toString().trim { it <= ' ' },
-                    binding.scanLayout.autoCompleteTextViewRfid.getText().toString().trim { it <= ' ' },
+                   binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
+                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
                     "False"
                 )
             } else if (binding.btnVehicleMapping.getText() == "Map" && b) {
                 modal = RfidMappingModel(
                     "123456",
-                    binding.scanLayout.tvVrn.getText().toString().trim { it <= ' ' },
-                    binding.scanLayout.autoCompleteTextViewRfid.getText().toString().trim { it <= ' ' },
+                    binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
+                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
                     "True"
                 )
             }
