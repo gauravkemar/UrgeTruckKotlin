@@ -40,8 +40,6 @@ import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultM
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
 import com.example.urgetruckkotlin.viewmodel.WbDetailViewModelFactory
 import com.example.urgetruckkotlin.viewmodel.WbDetailsViewModel
-import com.example.urgetruckkotlin.viewmodel.WbListViewModel
-import com.example.urgetruckkotlin.viewmodel.WblistViewModelFactory
 import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import com.zebra.rfid.api3.TagData
@@ -58,7 +56,7 @@ class SecurityInspectionActivity : AppCompatActivity(),
     lateinit var binding: ActivitySecurityInspectionBinding
     private lateinit var session: SessionManager
     private lateinit var viewModel: WbDetailsViewModel
-    private lateinit var viewModel1: WbListViewModel
+
     private val RfidValue = ""
     private var checkstate = true
     private lateinit var weightDetailsResultModel: WeightDetailsResultModel
@@ -91,10 +89,6 @@ class SecurityInspectionActivity : AppCompatActivity(),
         }
     }
 
-
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_security_inspection)
@@ -109,10 +103,6 @@ class SecurityInspectionActivity : AppCompatActivity(),
         val viewModelProviderFactory =
             WbDetailViewModelFactory(application, urgeTruckRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory)[WbDetailsViewModel::class.java]
-        val viewModelProviderFactory1 =
-            WblistViewModelFactory(application, urgeTruckRepository)
-        viewModel1 = ViewModelProvider(this, viewModelProviderFactory1)[WbListViewModel::class.java]
-
 
         //inittoolbar
         val layout_toolbar = findViewById<View>(R.id.layout_toolbar)
@@ -131,6 +121,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
         }
         TagDataSet = ArrayList<String>()
         defaulReaderOn()
+
+        getAllWeighBridge()
 
         binding.scanLayout.rgVehicleDetails.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { radioGroup, i ->
             if (radioGroup.checkedRadioButtonId == R.id.rbScanRfid) {
@@ -212,7 +204,7 @@ class SecurityInspectionActivity : AppCompatActivity(),
                 }
             }
         }
-        viewModel1.getAllWeighBridgeListMutableLiveData.observe(this) { response ->
+        viewModel.getAllWeighBridgeListMutableLiveData.observe(this) { response ->
             when (response) {
 
                 is Resource.Success -> {
@@ -264,6 +256,57 @@ class SecurityInspectionActivity : AppCompatActivity(),
                 }
             }
         }
+        viewModel.postSecurityCheckMutableLiveData.observe(this) { response ->
+            when (response) {
+                is Resource.Success -> {
+                    binding.clScan.visibility = View.GONE
+                    binding.clWeight.visibility = View.VISIBLE
+                    hideProgressBar()
+                    response.data?.let { resultResponse ->
+                        try {
+                            if (resultResponse != null) {
+                                try {
+                                    Utils.showCustomDialogFinish(
+                                        this,
+                                        resultResponse.status
+                                    )
+
+                                } catch (e: Exception) {
+                                    Utils.showCustomDialog(
+                                        this@SecurityInspectionActivity,
+                                        "Exception: No Data Found"
+                                    )
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Toasty.warning(
+                                this@SecurityInspectionActivity,
+                                e.printStackTrace().toString(),
+                                Toasty.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+
+                is Resource.Error -> {
+                    hideProgressBar()
+
+
+                    response.message?.let { errorMessage ->
+                        Toasty.error(
+                            this@SecurityInspectionActivity,
+                            "failed - \nError Message: $errorMessage"
+                        ).show()
+                        Utils.showCustomDialogFinish(this, errorMessage)
+                    }
+                }
+
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
+            }
+        }
+
         binding.securityInspectionLayout.radioGroup.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { radioGroup, i ->
             if (radioGroup.checkedRadioButtonId == R.id.rbAccept) {
                 reason = "Accept"
@@ -295,6 +338,21 @@ class SecurityInspectionActivity : AppCompatActivity(),
             }
         }
 
+    }
+
+    private fun getAllWeighBridge() {
+      try {
+          val baseurl: String = Utils.getSharedPrefs(this, "apiurl").toString()
+          viewModel.getAllWeighBridgeList("",baseurl)
+      }
+      catch (e:Exception)
+      {
+          Toasty.warning(
+              this@SecurityInspectionActivity,
+              e.printStackTrace().toString(),
+              Toasty.LENGTH_SHORT
+          ).show()
+      }
     }
 
 
