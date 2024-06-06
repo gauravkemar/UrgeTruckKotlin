@@ -7,12 +7,16 @@ import androidx.lifecycle.viewModelScope
 import com.example.urgetruckkotlin.helper.Constants
 import com.example.urgetruckkotlin.helper.Resource
 import com.example.urgetruckkotlin.helper.Utils
+import com.example.urgetruckkotlin.model.securityInspection.SecurityCheckResultModel
 
 import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import org.json.JSONObject
 import retrofit2.Response
+import retrofit2.http.Part
 
 class WbDetailsViewModel(
     application: Application,
@@ -80,4 +84,63 @@ class WbDetailsViewModel(
             }
         }
     }
+    ////////////
+    val postSecurityCheckMutableLiveData: MutableLiveData<Resource<SecurityCheckResultModel>> =
+        MutableLiveData()
+
+    fun postSecurityCheck(
+        token: String,
+        baseUrl: String,
+        @Part files: List<MultipartBody.Part>,
+        @Part("JSONData") jsonData: RequestBody
+    ) {
+        viewModelScope.launch {
+            safeAPICallPostSecurityCheck(token, baseUrl, files, jsonData)
+        }
+    }
+    private suspend fun safeAPICallPostSecurityCheck(
+        token: String,
+        baseUrl: String,
+        @Part files: List<MultipartBody.Part>,
+        @Part("JSONData") jsonData: RequestBody
+    ) {
+        postSecurityCheckMutableLiveData.postValue(Resource.Loading())
+        try {
+            if (Utils.hasInternetConnection(getApplication())) {
+                val response = rfidRepository.postSecurityCheck(token, baseUrl, files, jsonData)
+                postSecurityCheckMutableLiveData.postValue(
+                    handleDtmsPostSecurityCheck(response)
+                )
+            } else {
+                postSecurityCheckMutableLiveData.postValue(Resource.Error(Constants.NO_INTERNET))
+            }
+        } catch (t: Throwable) {
+            when (t) {
+                is Exception -> {
+                    postSecurityCheckMutableLiveData.postValue(Resource.Error("${t.message}"))
+                }
+
+                else -> postSecurityCheckMutableLiveData.postValue(Resource.Error(Constants.CONFIG_ERROR))
+            }
+        }
+    }
+
+    private fun handleDtmsPostSecurityCheck(response: Response<SecurityCheckResultModel>): Resource<SecurityCheckResultModel> {
+        var errorMessage = ""
+        if (response.isSuccessful) {
+            response.body()?.let { Response ->
+                return Resource.Success(Response)
+            }
+        } else if (response.errorBody() != null) {
+            val errorObject = response.errorBody()?.let {
+                JSONObject(it.charStream().readText())
+            }
+            errorObject?.let {
+                errorMessage = it.getString(Constants.HTTP_ERROR_MESSAGE)
+            }
+        }
+        return Resource.Error(errorMessage)
+    }
+
+
 }

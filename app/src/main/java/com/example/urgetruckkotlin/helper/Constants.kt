@@ -52,6 +52,7 @@ object Constants {
     const val GET_ALL_WEIGHBRIDGE_LIST = "GetAllWeighBridgeList"
     const val GET_WEIGHMENT_DETAILS = "GetWeighmentDetails"
     const val POST_VEHICAL_TRACKING_REQUEST="PostVehicleTrackingRequest"
+    const val POST_EXIT_CLEARANCE="PostExitClearance"
 
 
 

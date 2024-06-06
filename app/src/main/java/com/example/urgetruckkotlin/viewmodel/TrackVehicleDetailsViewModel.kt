@@ -48,7 +48,7 @@ class TrackVehicleDetailsViewModel(
                 JSONObject(it.charStream().readText())
             }
             errorObject?.let {
-                errorMessage = it.getString(Constants.HTTP_ERROR_MESSAGE)
+                errorMessage = it.getString("statusMessage")
             }
         }
         return Resource.Error(errorMessage)

@@ -8,6 +8,7 @@ import com.example.urgetruckkotlin.helper.Constants.GET_LOCATION_MASTER_DATA_BY_
 import com.example.urgetruckkotlin.helper.Constants.GET_WEIGHMENT_DETAILS
 import com.example.urgetruckkotlin.helper.Constants.HTTP_HEADER_AUTHORIZATION
 import com.example.urgetruckkotlin.helper.Constants.LOGIN_URL
+import com.example.urgetruckkotlin.helper.Constants.POST_EXIT_CLEARANCE
 import com.example.urgetruckkotlin.helper.Constants.POST_RFId
 import com.example.urgetruckkotlin.helper.Constants.POST_VEHICAL_TRACKING_REQUEST
 import com.example.urgetruckkotlin.helper.Constants.Post_RFIDMAPPING
@@ -17,6 +18,7 @@ import com.example.urgetruckkotlin.model.login.vehicalDetection.PostRfidModel
 import com.example.urgetruckkotlin.model.login.vehicalDetection.PostRfidResultModel
 import com.example.urgetruckkotlin.model.login.vehicalDetection.getLocationList.GetLocationListResponse
 import com.example.urgetruckkotlin.model.login.vehicalDetection.getlocationmasterdatabylocationId.GetLocationMasterDataByLocationId
+import com.example.urgetruckkotlin.model.securityInspection.SecurityCheckResultModel
 import com.example.urgetruckkotlin.model.securityInspection.WBResponseModel
 import com.example.urgetruckkotlin.model.securityInspection.WeighmentDetails
 import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
@@ -24,11 +26,15 @@ import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleModel
 import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleResultModel
 import com.example.urgetruckkotlin.model.vehicalMapping.RfidMappingModel
 import com.example.urgetruckkotlin.model.vehicalMapping.RfidMappingResultModel
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface UrgeTruckAPI {
@@ -100,6 +106,14 @@ interface UrgeTruckAPI {
 //        @Query("RFIDTagNo") rfid: String?,
 //        @Query("VRN") vrn: String?
     ): Response<TrackVehicleResultModel>
+
+    @Multipart
+    @POST(POST_EXIT_CLEARANCE)
+    suspend fun postSecurityCheck(
+        @Header(HTTP_HEADER_AUTHORIZATION) token: String?,
+        @Part files: List<MultipartBody.Part>,
+        @Part("JSONData") name: RequestBody
+    ): Response<SecurityCheckResultModel>
 
 
 }

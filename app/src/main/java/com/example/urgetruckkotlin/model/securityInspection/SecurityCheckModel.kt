@@ -6,5 +6,7 @@ data class SecurityCheckModel(
     val jobMilestoneId: String,
     val vehicleTransactionId: String,
     val VRN: String,
-    val weighBridgeId: String
+    val weighBridgeId: Int,
+    val Reason: String,
+    val Accept: String,
 )

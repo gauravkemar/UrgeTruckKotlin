@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
@@ -21,6 +22,8 @@ import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.example.urgetruckkotlin.R
@@ -30,22 +33,22 @@ import com.example.urgetruckkotlin.helper.RFIDHandlerForSecurityInspection
 import com.example.urgetruckkotlin.helper.Resource
 import com.example.urgetruckkotlin.helper.SessionManager
 import com.example.urgetruckkotlin.helper.Utils
+import com.example.urgetruckkotlin.model.securityInspection.SecurityCheckModel
 import com.example.urgetruckkotlin.model.securityInspection.WBListResultModel
 import com.example.urgetruckkotlin.model.securityInspection.WBResponseModel
 import com.example.urgetruckkotlin.model.securityInspection.WeightDetailsResultModel
 import com.example.urgetruckkotlin.repository.URGETRUCKRepository
-import com.example.urgetruckkotlin.viewmodel.VehicaDetectionViewFactory
 import com.example.urgetruckkotlin.viewmodel.WbDetailViewModelFactory
 import com.example.urgetruckkotlin.viewmodel.WbDetailsViewModel
 import com.example.urgetruckkotlin.viewmodel.WbListViewModel
 import com.example.urgetruckkotlin.viewmodel.WblistViewModelFactory
+import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import com.zebra.rfid.api3.TagData
 import es.dmoral.toasty.Toasty
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.http.Part
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -71,7 +74,9 @@ class SecurityInspectionActivity : AppCompatActivity(),
     var rfidHandler: RFIDHandlerForSecurityInspection? = null
     var isRFIDInit = false
     var resumeFlag = false
-
+    lateinit var wbId:  MutableList<Int>
+    lateinit var wbName: ArrayList<String>
+    private val REQUEST_CODE_ASK_PERMISSIONS = 123
     private lateinit var progress: ProgressDialog
     private fun initReader() {
         rfidHandler = RFIDHandlerForSecurityInspection()
@@ -97,7 +102,8 @@ class SecurityInspectionActivity : AppCompatActivity(),
         TagDataSet = ArrayList()
         progress = ProgressDialog(this)
         progress.setMessage("Loading...")
-
+        wbId =  ArrayList()
+        wbName =  ArrayList()
         binding.scanLayout.autoCompleteTextViewRfid.setText(RfidValue)
         val urgeTruckRepository = URGETRUCKRepository()
         val viewModelProviderFactory =
@@ -149,13 +155,13 @@ class SecurityInspectionActivity : AppCompatActivity(),
         binding.btnScanrfid.setOnClickListener(View.OnClickListener() { view ->
             confirmInput()
         })
+
         binding.securityInspectionLayout.btnPostSecurityCheck.setOnClickListener(View.OnClickListener() { view ->
-            confirmInputCheck()
+            confirmInput()
         })
 
         viewModel.getWeightDetailsMutableLiveData.observe(this) { response ->
             when (response) {
-
                 is Resource.Success -> {
                     binding.clScan.visibility = View.GONE
                     binding.clWeight.visibility = View.VISIBLE
@@ -217,20 +223,12 @@ class SecurityInspectionActivity : AppCompatActivity(),
                         try {
                             if (resultResponse != null) {
                                 try {
-
                                     wbResponseModel = resultResponse
-
-                                    val wbId = ArrayList<String>()
-                                    val wbName = ArrayList<String>()
-
                                     for (item in wbResponseModel) {
                                         wbId.add(item.weighBridgeId)
                                         wbName.add(item.weighBridgeName)
                                     }
-
                                     populateWbDropdown(wbName)
-
-
                                 } catch (e: Exception) {
                                     Utils.showCustomDialog(
                                         this@SecurityInspectionActivity,
@@ -283,11 +281,19 @@ class SecurityInspectionActivity : AppCompatActivity(),
                 auto = true
                 binding.securityInspectionLayout.actvWbSelection.setText("")
                 binding.securityInspectionLayout.layoutWbSelection.visibility = View.GONE
-
-
             }
             Log.e("reason", reason)
         })
+       binding.securityInspectionLayout.cbWbAllocate.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                binding.securityInspectionLayout.textInputLayoutWbSelection.visibility = View.INVISIBLE
+                binding.securityInspectionLayout.actvWbSelection.setText("")
+                auto = true
+            } else {
+                binding.securityInspectionLayout.textInputLayoutWbSelection.visibility = View.VISIBLE
+                auto = false
+            }
+        }
 
     }
 
@@ -336,15 +342,19 @@ class SecurityInspectionActivity : AppCompatActivity(),
     }
 
     fun confirmInputCheck() {
-        if (!validateReason() || !validateWb()) {
+        if (!auto) {
+            if (!validateWb()) {
+                return
+            }
+        }
+        if (!validateReason()) {
             return
         }
 
+
+        requestPermission()
         uploadImages()
-
     }
-
-
 
 
     private fun validateReason(): Boolean {
@@ -379,12 +389,13 @@ class SecurityInspectionActivity : AppCompatActivity(),
 
         if (binding.clScan.visibility== View.VISIBLE)
         {
+
+
             if (validateRFIDorVRN()) {
-
                 callgetWeightDetailsApi()
-
             }
         }else if (binding.clWeight.visibility== View.VISIBLE){
+
             confirmInputCheck()
         }
 
@@ -397,9 +408,7 @@ class SecurityInspectionActivity : AppCompatActivity(),
         var edVrm = binding.scanLayout.tvVrn.text.toString().trim()
         try {
             if (checkstate) {
-
                 viewModel.getWeightDetails("", baseurl, 123456789, edRfid, "")
-
             } else {
                 viewModel.getWeightDetails("", baseurl, 123456789, "", edVrm)
             }
@@ -622,13 +631,69 @@ class SecurityInspectionActivity : AppCompatActivity(),
         // MultipartBody.Part is used to send also the actual file name
         return MultipartBody.Part.createFormData(partName, file.name, requestFile)
     }
-    private fun uploadImages() {
-        var list: MutableList<MultipartBody.Part> = ArrayList()
-        for (u in files)
-        {
-            list.add(prepareFilePart("file", u));
+    private fun requestPermission() {
+        if (ContextCompat.checkSelfPermission(this!!, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this!!, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_CODE_ASK_PERMISSIONS)
         }
+    }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_CODE_ASK_PERMISSIONS -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    uploadImages()
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+    private fun uploadImages() {
+        try {
+            var list: MutableList<MultipartBody.Part> = ArrayList()
+            for (u in files)
+            {
+                list.add(prepareFilePart("file", u));
+            }
+            val baseurl: String = Utils.getSharedPrefs(this, "apiurl").toString()
+
+            val modal = if (auto) {
+                SecurityCheckModel(
+                    "123456789",
+                    "",
+                    weightDetailsResultModel.weighmentDetails.jobMilestoneId.toString(),
+                    weightDetailsResultModel.weighmentDetails.vehicleTransactionId.toString(),
+                    weightDetailsResultModel.weighmentDetails.vrn,0,
+                    "WEIGHMENT DISTURBANCY",
+                    reason,
+                )
+            } else {
+                val weighbridgeId = wbId[wbName.indexOf(binding.securityInspectionLayout.actvWbSelection.text.toString())]
+                SecurityCheckModel(
+                    "123456789",
+                    "",
+                    weightDetailsResultModel.weighmentDetails.jobMilestoneId.toString(),
+                    weightDetailsResultModel.weighmentDetails.vehicleTransactionId.toString(),
+                    weightDetailsResultModel.weighmentDetails.vrn,weighbridgeId,
+                    "WEIGHMENT DISTURBANCY",
+                    reason,
+                )
+            }
+            val filename = RequestBody.create(
+                "text/plain".toMediaTypeOrNull(),
+                Gson().toJson(modal)
+            )
+            viewModel.postSecurityCheck("",baseurl,list,filename)
+        }
+        catch (e:Exception)
+        {
+            Toasty.warning(
+                this@SecurityInspectionActivity,
+                 e.printStackTrace().toString(),
+                Toasty.LENGTH_SHORT
+            ).show()
+        }
 
 
     }

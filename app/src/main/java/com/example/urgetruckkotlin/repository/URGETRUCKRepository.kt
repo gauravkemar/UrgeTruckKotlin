@@ -5,9 +5,12 @@ import com.example.urgetruckkotlin.model.login.LoginRequest
 import com.example.urgetruckkotlin.model.login.vehicalDetection.PostRfidModel
 import com.example.urgetruckkotlin.model.trackVehical.TrackVehicleModel
 import com.example.urgetruckkotlin.model.vehicalMapping.RfidMappingModel
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 class URGETRUCKRepository {
@@ -84,6 +87,14 @@ class URGETRUCKRepository {
 //        @Query("RFIDTagNo") rfid: String,
 //        @Query("VRN") vrn: String
     ) = RetrofitInstance.api(baseUrl).getTrackVehicleDetails(token,trackVehicleModel)
+
+
+    suspend fun postSecurityCheck(
+        token: String,
+        baseUrl: String,
+        @Part files: List<MultipartBody.Part>,
+        @Part("JSONData") jsonData: RequestBody
+    ) = RetrofitInstance.api(baseUrl).postSecurityCheck(token,files,jsonData)
 
 
 

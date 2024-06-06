@@ -58,10 +58,10 @@ class VehicalRifdMappingModel (
             }
             errorObject?.let {
 
-                var errorStatus=it.getString("Status")
+                var errorStatus=it.getString("status")
                 if(errorStatus!=null)
                 {
-                    errorMessage = it.getString("Status")
+                    errorMessage = it.getString("status")
                 }
                 else{
                     errorMessage = it.getString(Constants.HTTP_ERROR_MESSAGE)

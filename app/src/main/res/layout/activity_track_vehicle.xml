@@ -47,7 +47,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clDisplay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/layout_toolbar"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:visibility="gone">
 
             <RelativeLayout
@@ -59,6 +61,8 @@
                 android:layout_height="match_parent">
 
             <include
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:id="@+id/trackVehicalLayout"
                 layout="@layout/fragment_track_vehicle" />
             </androidx.core.widget.NestedScrollView>

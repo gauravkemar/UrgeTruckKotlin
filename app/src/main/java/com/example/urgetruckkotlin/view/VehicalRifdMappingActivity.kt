@@ -35,6 +35,7 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
     lateinit var TagDataSet: ArrayList<String>
     private lateinit var viewModel: VehicalRifdMappingModel
     lateinit var modal: RfidMappingModel
+
     //rfid
     private var mediaPlayer: MediaPlayer? = null
     var rfidHandler: RFIDHandlerForVehiclemapping? = null
@@ -42,6 +43,7 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
     var resumeFlag = false
 
     private lateinit var progress: ProgressDialog
+
     private fun initReader() {
         rfidHandler = RFIDHandlerForVehiclemapping()
         rfidHandler!!.init(this)
@@ -88,8 +90,6 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
             finishAffinity()
         }
         binding.btnVehicleMapping.setOnClickListener(View.OnClickListener() {
-
-
             if (binding.btnVehicleMapping.getText().equals("Verify Tag")) {
                 VerifyTag();
             } else if (binding.btnVehicleMapping.getText().equals("Map")) {
@@ -170,21 +170,27 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
                             "failed - \nError Message: $errorMessage"
                         ).show()
                         if (errorMessage == "RecordNotFound") {
-                            Utils.showCustomDialog(this@VehicalRifdMappingActivity, errorMessage ?: "")
-                           binding.scanLayout.textInputLayoutVehicleno .visibility = View.VISIBLE
-                            binding.scanLayout.autoCompleteTextViewRfid.setText( binding.scanLayout.autoCompleteTextViewRfid.getText()
+                            Utils.showCustomDialog(
+                                this@VehicalRifdMappingActivity,
+                                errorMessage ?: ""
+                            )
+                            binding.scanLayout.textInputLayoutVehicleno.visibility = View.VISIBLE
+                            binding.scanLayout.autoCompleteTextViewRfid.setText(binding.scanLayout.autoCompleteTextViewRfid.getText()
                                 .toString()
                                 .trim { it <= ' ' })
-                          binding. btnVehicleMapping.text = "Map"
+                            binding.btnVehicleMapping.text = "Map"
                         } else if (errorMessage == "Duplicate") {
-                            showCustomDialog(this@VehicalRifdMappingActivity, "The vehicle already has a different RFID tag mapped. Do you want to overwrite?")
-                            binding.scanLayout.textInputLayoutVehicleno .visibility = View.VISIBLE
-                            binding.scanLayout.autoCompleteTextViewRfid.setText( binding.scanLayout.autoCompleteTextViewRfid.getText()
+                            showCustomDialog(
+                                this@VehicalRifdMappingActivity,
+                                "The vehicle already has a different RFID tag mapped. Do you want to overwrite?"
+                            )
+                            binding.scanLayout.textInputLayoutVehicleno.visibility = View.VISIBLE
+                            binding.scanLayout.autoCompleteTextViewRfid.setText(binding.scanLayout.autoCompleteTextViewRfid.getText()
                                 .toString()
                                 .trim { it <= ' ' })
                             binding.scanLayout.tvRfid.isFocusable = false
                             binding.scanLayout.tvVrn.isFocusable = false
-                          binding.btnVehicleMapping.visibility = View.GONE
+                            binding.btnVehicleMapping.visibility = View.GONE
                         }
                     }
 
@@ -197,6 +203,7 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
             }
         }
     }
+
     fun showCustomDialog(context: Context?, message: String?) {
         val builder = AlertDialog.Builder(context)
         builder.setMessage(message)
@@ -209,6 +216,7 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
             ) { dialogInterface, i -> callPostRfidMapApi(true) }
             .show()
     }
+
     private fun VerifyTagAndVrn() {
         val scanVRNInput: String =
             binding.scanLayout.textInputLayoutVehicleno.editText.toString().trim()
@@ -220,48 +228,64 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
             callPostRfidMapApi(false)
         }
     }
+
     fun callPostRfidMapApi(b: Boolean) {
 
         try {
-            if (binding.btnVehicleMapping.getText() == "Verify Tag") {
-                modal = RfidMappingModel(
-                    "123456",
-                    "",
-                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
-                    "False"
-                )
-            } else if (binding.btnVehicleMapping.getText() == "Map" && b) {
-                modal = RfidMappingModel(
-                    "123456",
-                   binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
-                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
-                    "False"
-                )
-            } else if (binding.btnVehicleMapping.getText() == "Map" && b) {
-                modal = RfidMappingModel(
-                    "123456",
-                    binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
-                    binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim { it <= ' ' },
-                    "True"
-                )
+
+            val modal = when {
+                binding.btnVehicleMapping.text == "Verify Tag" -> {
+                    RfidMappingModel(
+                        "123456",
+                        "",
+                        binding.scanLayout.autoCompleteTextViewRfid.text.toString()
+                            .trim { it <= ' ' },
+                        "False"
+                    )
+                }
+
+                binding.btnVehicleMapping.text == "Map" && !b -> {
+                    RfidMappingModel(
+                        "123456",
+                        binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
+                        binding.scanLayout.autoCompleteTextViewRfid.text.toString()
+                            .trim { it <= ' ' },
+                        "False"
+                    )
+                }
+
+                binding.btnVehicleMapping.text == "Map" && b -> {
+                    RfidMappingModel(
+                        "123456",
+                        binding.scanLayout.tvVrn.text.toString().trim { it <= ' ' },
+                        binding.scanLayout.autoCompleteTextViewRfid.text.toString()
+                            .trim { it <= ' ' },
+                        "True"
+                    )
+                }
+
+                else -> null // Handle the default case if necessary
             }
+
             val baseurl: String =
                 Utils.getSharedPrefs(this@VehicalRifdMappingActivity, "apiurl").toString()
-            viewModel.rfidMapping("", baseUrl = baseurl, modal)
+            modal?.let { viewModel.rfidMapping("", baseUrl = baseurl, it) }
         } catch (e: Exception) {
 
         }
     }
+
     private fun VerifyTag() {
-        val scanRFIDInput= binding.scanLayout.tvRfid.editText.toString().trim()
+        val scanRFIDInput = binding.scanLayout.tvRfid.editText.toString().trim()
 
         if (scanRFIDInput.isEmpty()) {
-          binding.scanLayout. tvRfid.setError("Press trigger to Scan RFID")
+            binding.scanLayout.tvRfid.setError("Press trigger to Scan RFID")
         } else {
             callPostRfidMapApi(false)
         }
         //callPostRfidMapApi();
     }
+
     ////rfid handle
     override fun onResume() {
         super.onResume()
@@ -312,7 +336,6 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
     }
 
 
-
     override fun handleTriggerPress(pressed: Boolean) {
         if (pressed) {
             performInventory()
@@ -326,32 +349,32 @@ class VehicalRifdMappingActivity : AppCompatActivity(),
             var tagDataFromScan = tagData[0].tagID
             mediaPlayer?.start()
 
-                //binding.tvBarcode.setText(tagDataFromScan)
-                //Log.e(TAG, "RFID Data : $tagDataFromScan")
-                binding.scanLayout.autoCompleteTextViewRfid.setText(tagData[0].tagID.toString())
-                stopInventory()
+            //binding.tvBarcode.setText(tagDataFromScan)
+            //Log.e(TAG, "RFID Data : $tagDataFromScan")
+            binding.scanLayout.autoCompleteTextViewRfid.setText(tagData[0].tagID.toString())
+            stopInventory()
 
-                if (!TagDataSet?.contains(tagDataFromScan)!!)
-                    TagDataSet.add(tagDataFromScan)
-                val adapter1: ArrayAdapter<String> = ArrayAdapter<String>(
-                    this,
-                    R.layout.dropdown_menu_popup_item,
-                    TagDataSet
-                )
-                runOnUiThread {
-                    if (TagDataSet.size == 1) {
-                        binding.scanLayout.autoCompleteTextViewRfid.setText(
-                            adapter1.getItem(0).toString(),
-                            false
-                        )
-                    } else {
-                        binding.scanLayout.autoCompleteTextViewRfid.setText("")
-                        binding.scanLayout.tvRfid.setError("Select the RFID value from dropdown")
-                    }
-                    binding.scanLayout.autoCompleteTextViewRfid.setAdapter<ArrayAdapter<String>>(
-                        adapter1
+            if (!TagDataSet?.contains(tagDataFromScan)!!)
+                TagDataSet.add(tagDataFromScan)
+            val adapter1: ArrayAdapter<String> = ArrayAdapter<String>(
+                this,
+                R.layout.dropdown_menu_popup_item,
+                TagDataSet
+            )
+            runOnUiThread {
+                if (TagDataSet.size == 1) {
+                    binding.scanLayout.autoCompleteTextViewRfid.setText(
+                        adapter1.getItem(0).toString(),
+                        false
                     )
+                } else {
+                    binding.scanLayout.autoCompleteTextViewRfid.setText("")
+                    binding.scanLayout.tvRfid.setError("Select the RFID value from dropdown")
                 }
+                binding.scanLayout.autoCompleteTextViewRfid.setAdapter<ArrayAdapter<String>>(
+                    adapter1
+                )
+            }
 
         }
     }

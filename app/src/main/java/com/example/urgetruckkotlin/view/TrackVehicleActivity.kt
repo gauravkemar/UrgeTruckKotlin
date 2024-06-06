@@ -127,7 +127,7 @@ class TrackVehicleActivity : AppCompatActivity(),
                         try {
                             if (resultResponse != null) {
                                 try {
-                                    binding.scanLayout.tvVrn.append(
+                                    binding.trackVehicalLayout.tvvrn.append(
                                         resultResponse.vehicleTransactionDetails.vrn
                                     )
                                     binding.trackVehicalLayout.tvDriverName.append(
@@ -211,8 +211,8 @@ class TrackVehicleActivity : AppCompatActivity(),
 
     fun callgetVehicaltDetailsApi() {
         val baseurl: String = Utils.getSharedPrefs(this, "apiurl").toString()
-        var edRfid = binding.scanLayout.autoCompleteTextViewRfid.toString().trim()
-        var edVrm = binding.scanLayout.tvVrn.toString().trim()
+        var edRfid = binding.scanLayout.autoCompleteTextViewRfid.text.toString().trim()
+        var edVrm = binding.scanLayout.tvVrn.text.toString().trim()
         try {
             if (checkstate) {
                 viewModel.getTrackVehicleDetails(
